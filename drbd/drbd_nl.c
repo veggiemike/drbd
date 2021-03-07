@@ -1531,8 +1531,16 @@ void drbd_set_my_capacity(struct drbd_device *device, sector_t size)
 	char ppb[10];
 
 	set_capacity(device->vdisk, size);
-	revalidate_disk_size(device->vdisk, false);
-
+	/* we don't register a revalidate function in drbd_ops.
+	 * revalidate_disk, which used to simply call our registered callback
+	 * has gone away in 5.10, replaced by revalidate_disk_size, which went
+	 * away in 5.11...  so there's nothing to do?
+	 *
+	 * FIXME: not really sure if I've interpretted that right...
+	 *
+	revalidate_disk(device->vdisk);
+	*/
+	
 	drbd_info(device, "size = %s (%llu KB)\n",
 		ppsize(ppb, size>>1), (unsigned long long)size>>1);
 }
