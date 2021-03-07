@@ -3164,7 +3164,8 @@ bool drbd_rs_should_slow_down(struct drbd_peer_device *peer_device, sector_t sec
 bool drbd_rs_c_min_rate_throttle(struct drbd_peer_device *peer_device)
 {
 	struct drbd_device *device = peer_device->device;
-	struct hd_struct *part = &device->ldev->backing_bdev->bd_contains->bd_disk->part0;
+	struct block_device *bdev = bdev_whole(device->ldev->backing_bdev);
+	//struct hd_struct *part = &device->ldev->backing_bdev->bd_contains->bd_disk->part0;
 	unsigned long db, dt, dbdt;
 	unsigned int c_min_rate;
 	int curr_events;
@@ -3177,8 +3178,8 @@ bool drbd_rs_c_min_rate_throttle(struct drbd_peer_device *peer_device)
 	if (c_min_rate == 0)
 		return false;
 
-	curr_events = (int)part_stat_read(part, sectors[0])
-		+ (int)part_stat_read(part, sectors[1])
+	curr_events = (int)part_stat_read(bdev, sectors[0])
+		+ (int)part_stat_read(bdev, sectors[1])
 		- atomic_read(&device->rs_sect_ev);
 
 	if (atomic_read(&device->ap_actlog_cnt) || curr_events - peer_device->rs_last_events > 64) {
